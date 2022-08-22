@@ -26,7 +26,7 @@ Deleting images.
 Managing containers
 ---
 Starting a container with a specific command.  
-The container stops when the commands terminates.  
+The container stops when the command terminates.  
 Pressing Ctrl-PQ detaches the terminal.
 
     docker container run -it redis /bin/bash
@@ -40,7 +40,22 @@ With the image's default command or explicitly.
 Listing containers.
 
     docker container ls
+    docker container ls -a
 
-Stopping a container.
+Sending a command to a running container.
 
-    docker container stop 7919c1dda089
+    docker exec -it bf59d85536e8 /bin/bash
+
+Stopping a container.  
+The container is not deleted.
+
+    docker container stop bf59d85536e8
+
+Restarting a container.
+
+    docker container start bf59d85536e8
+
+Deleting a container.
+
+    docker container stop bf59d85536e8
+    docker container rm bf59d85536e8
