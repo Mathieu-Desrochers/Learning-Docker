@@ -66,8 +66,8 @@ Deleting a container.
 
 Building images
 ---
-Writing the Dockerfile.  
-Set working directory to /image-hello-world.
+Set the working directory to /image-hello-world.  
+Writing the Dockerfile.
 
     FROM golang:1.19.0
     COPY . /src
@@ -82,3 +82,24 @@ Building the image.
 Running the image.
 
     docker container run image-hello-world:latest
+
+Building images in multiple stages
+---
+Building an image stripped from the compiler and tools.  
+Just the runtime requirements.
+
+Set the working directory to /image-hello-world-stages.  
+Writing the Dockerfile.
+
+    FROM golang:1.19.0-bullseye AS compile
+    COPY . /src
+    WORKDIR /src
+    RUN go build main.go
+
+    FROM debian:bullseye-slim
+    WORKDIR /usr/bin
+    COPY --from=compile /src/main .
+    CMD ["./main"]
+
+The previous image was chunky at 994MB.  
+We got it down to 82MB.
