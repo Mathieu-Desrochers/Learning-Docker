@@ -42,7 +42,11 @@ Listing containers.
     docker container ls
     docker container ls -a
 
-Sending a command to a running container.
+Inspecting containers.
+
+    docker container inspect bf59d85536e8
+
+Sending commands to a running container.
 
     docker exec -it bf59d85536e8 /bin/bash
 
@@ -59,3 +63,22 @@ Deleting a container.
 
     docker container stop bf59d85536e8
     docker container rm bf59d85536e8
+
+Building images
+---
+Writing the Dockerfile.  
+Set working directory to /image-hello-world.
+
+    FROM golang:1.19.0
+    COPY . /src
+    WORKDIR /src
+    RUN go build main.go
+    CMD ["./main"]
+
+Building the image.
+
+    docker image build -t image-hello-world:latest .
+
+Running the image.
+
+    docker container run image-hello-world:latest
