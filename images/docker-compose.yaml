@@ -1,18 +1,12 @@
-version: "3.0"
+version: "3.9"
 services:
   api:
-    build: api
+    build: ./api
     ports:
       - target: 8081
         published: 8081
-    networks:
-      - api-network
   database:
     build: ./database
-    expose:
-      - 8080
-    networks:
-      - api-network
-
-networks:
-  api-network:
+    ports:
+      - target: 8080
+        published: 8080

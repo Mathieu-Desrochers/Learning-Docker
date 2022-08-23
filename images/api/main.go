@@ -10,7 +10,7 @@ func main() {
 	http.HandleFunc("/sum", func(w http.ResponseWriter, r *http.Request) {
 		log.Print("GET /sum")
 
-		_, err := http.Get("http://database:8080/numbers")
+		_, err := http.Get("http://host.docker.internal:8080/numbers")
 		if err != nil {
 			log.Fatal(err)
 		}
