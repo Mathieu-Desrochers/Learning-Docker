@@ -66,7 +66,7 @@ Deleting a container.
 
 Building images
 ---
-Set the working directory to /image-hello-world.  
+Set the working directory to /images/hello-world.  
 Writing the Dockerfile.
 
     FROM golang:1.19.0
@@ -88,7 +88,7 @@ Building images in multiple stages
 Building an image stripped from the compiler and tools.  
 Just the runtime requirements.
 
-Set the working directory to /image-hello-world-stages.  
+Set the working directory to /images/hello-world-stages.  
 Writing the Dockerfile.
 
     FROM golang:1.19.0-bullseye AS compile
@@ -103,3 +103,6 @@ Writing the Dockerfile.
 
 The previous image was chunky at 994MB.  
 We got it down to 82MB.
+
+Composing applications
+---

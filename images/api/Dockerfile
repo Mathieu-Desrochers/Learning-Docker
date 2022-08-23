@@ -4,6 +4,7 @@ WORKDIR /src
 RUN go build main.go
 
 FROM debian:bullseye-slim
-WORKDIR /usr/bin
+WORKDIR /usr/local/bin
 COPY --from=compile /src/main .
+EXPOSE 8081
 CMD ["./main"]
