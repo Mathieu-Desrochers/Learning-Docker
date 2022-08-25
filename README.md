@@ -29,19 +29,19 @@ Starting a container.
 The container stops when the command terminates.  
 Pressing Ctrl-PQ detaches the terminal.
 
-    docker container run ubuntu
-    docker container run ubuntu /bin/bash
+    docker container run -it ubuntu
+    docker container run -it ubuntu /bin/bash
 
 Starting a container in the background.
 
-    docker container run -d ubuntu /bin/sh -c 'sleep 10'
+    docker container run -d ubuntu /bin/bash -c 'sleep 10'
 
 Listing containers.
 
     docker container ls
     docker container ls -a
 
-Executing commands on a running container.
+Executing commands in a running container.
 
     docker exec -it 560b03d1bcd2 /bin/bash
 
@@ -71,11 +71,11 @@ Writing the Dockerfile.
 
 Building the image.
 
-    docker image build -t image-hello-world:latest .
+    docker image build -t image-hello-world .
 
 Running the image.
 
-    docker container run image-hello-world:latest
+    docker container run image-hello-world
 
 Multiple stages
 ---
@@ -96,16 +96,16 @@ Writing the Dockerfile.
 
 Building the image.
 
-    docker image build -t stages:latest .
+    docker image build -t stages .
 
 The previous image was chunky at 994MB.  
 We got it down to 82 MB.
 
 Network
 ---
-Exposing a container port on the host.
+Exposing container ports on the host.
 
-Set the working directory to /images/api-numbers.  
+Set the working directory to /images/api-letters.  
 Writing the Dockerfile.
 
     FROM golang:1.19.0
@@ -115,14 +115,81 @@ Writing the Dockerfile.
     EXPOSE 8080
     CMD ["./main"]
 
-Running the image.
+Running the container.
 
-    docker image build -t api-numbers:latest .
-    docker container run -p 5000:8080 api-numbers:latest
+    docker image build -t api-letters .
+    docker container run -p 5000:8080 api-letters
 
 Connecting through the host.
 
-    curl localhost:5000/numbers
+    curl localhost:5000/letters
 
-Compose
+Composing containers
 ---
+Managing multiple containers as a unit.
+
+Set the working directory to /compose/multiple-containers.  
+Writing the docker-compose.yml.
+
+    version: "3.9"
+    services:
+      api-letters:
+        build: ../../images/api-letters
+        ports:
+          - 5000:8080
+      api-numbers:
+        build: ../../images/api-numbers
+        ports:
+          - 5001:8081
+
+Running the containers.
+
+    docker-compose up
+    docker-compose up -d
+
+Inspecting the containers.
+
+    docker-compose ps
+    docker-compose top
+
+Stopping the containers
+
+    docker-compose stop
+
+Restarting the containers.
+
+    docker-compose restart
+
+Deleting the containers.
+
+    docker-compose stop
+    docker-compose rm
+
+    docker-compose down
+
+
+
+
+
+Connecting containers
+---
+Set the working directory to /compose/network.  
+Writing the docker-compose.yml.
+
+    version: "3.9"
+    services:
+      api-sum:
+        build: ../../images/api-sum
+        environment:
+          - API_NUMBERS_URL=http://api-numbers:8080
+        ports:
+          - 5001:8081
+      api-numbers:
+        build: ../../images/api-numbers
+        expose:
+          - 8080
+
+Running the containers.
+
+    docker-compose up
+    curl localhost:5001/numbers

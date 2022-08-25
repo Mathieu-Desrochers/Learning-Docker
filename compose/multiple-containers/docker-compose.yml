@@ -1,0 +1,10 @@
+version: "3.9"
+services:
+  api-letters:
+    build: ../../images/api-letters
+    ports:
+      - 5000:8080
+  api-numbers:
+    build: ../../images/api-numbers
+    ports:
+      - 5001:8081

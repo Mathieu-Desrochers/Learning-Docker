@@ -6,5 +6,5 @@ RUN go build main.go
 FROM debian:bullseye-slim
 WORKDIR /usr/local/bin
 COPY --from=compile /src/main .
-EXPOSE 8081
+EXPOSE 8082
 CMD ["./main"]

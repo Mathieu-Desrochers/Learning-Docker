@@ -12,9 +12,9 @@ func main() {
 		json.NewEncoder(w).Encode([]int{1, 2, 3, 4, 5})
 	})
 
-	log.Print("Listening on :8080...")
+	log.Print("Listening on :8081...")
 
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8081", nil)
 	if err != nil {
 		log.Fatal(err)
 	}
