@@ -7,9 +7,9 @@ This is the official registry.
 
 Downloading images.
 
-    docker pull redis
-    docker pull redis:7.0
-    docker pull redis:latest
+    docker pull ubuntu
+    docker pull ubuntu:20.04
+    docker pull ubuntu:latest
 
 Listing images.
 
@@ -17,52 +17,46 @@ Listing images.
 
 Inspecting images.
 
-    docker image inspect redis
+    docker image inspect ubuntu
 
 Deleting images.
 
-    docker image rm redis
+    docker image rm ubuntu
 
 Managing containers
 ---
-Starting a container with a specific command.  
+Starting a container.  
 The container stops when the command terminates.  
 Pressing Ctrl-PQ detaches the terminal.
 
-    docker container run -it redis /bin/bash
+    docker container run ubuntu
+    docker container run ubuntu /bin/bash
 
-Starting a container as a deamon.  
-With the image's default command or explicitly.
+Starting a container in the background.
 
-    docker container run -d redis
-    docker container run -d redis /bin/sh -c redis-server
+    docker container run -d ubuntu /bin/sh -c 'sleep 10'
 
 Listing containers.
 
     docker container ls
     docker container ls -a
 
-Inspecting containers.
+Executing commands on a running container.
 
-    docker container inspect bf59d85536e8
+    docker exec -it 560b03d1bcd2 /bin/bash
 
-Sending commands to a running container.
+Stopping a container.
 
-    docker exec -it bf59d85536e8 /bin/bash
-
-Stopping a container.  
-The container is not deleted.
-
-    docker container stop bf59d85536e8
+    docker container stop 560b03d1bcd2
 
 Restarting a container.
 
-    docker container start bf59d85536e8
+    docker container start 560b03d1bcd2
 
 Deleting a container.
 
-    docker container stop bf59d85536e8
-    docker container rm bf59d85536e8
+    docker container stop 560b03d1bcd2
+    docker container rm 560b03d1bcd2
 
 Building images
 ---
@@ -83,12 +77,11 @@ Running the image.
 
     docker container run image-hello-world:latest
 
-Building images in multiple stages
+Multiple stages
 ---
-Building an image stripped from the compiler and tools.  
-Just the runtime requirements.
+Building an image without the compiler and source code.  
 
-Set the working directory to /images/hello-world-stages.  
+Set the working directory to /images/stages.  
 Writing the Dockerfile.
 
     FROM golang:1.19.0-bullseye AS compile
@@ -101,8 +94,35 @@ Writing the Dockerfile.
     COPY --from=compile /src/main .
     CMD ["./main"]
 
-The previous image was chunky at 994MB.  
-We got it down to 82MB.
+Building the image.
 
-Composing applications
+    docker image build -t stages:latest .
+
+The previous image was chunky at 994MB.  
+We got it down to 82 MB.
+
+Network
+---
+Exposing a container port on the host.
+
+Set the working directory to /images/api-numbers.  
+Writing the Dockerfile.
+
+    FROM golang:1.19.0
+    COPY . /src
+    WORKDIR /src
+    RUN go build main.go
+    EXPOSE 8080
+    CMD ["./main"]
+
+Running the image.
+
+    docker image build -t api-numbers:latest .
+    docker container run -p 5000:8080 api-numbers:latest
+
+Connecting through the host.
+
+    curl localhost:5000/numbers
+
+Compose
 ---
