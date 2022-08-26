@@ -167,6 +167,74 @@ Deleting the containers.
 
     docker-compose down
 
+Swarms
+---
+Clustering multiple docker hosts.  
+Create three VMs that can communicate with each other.
+
+On the first VM.  
+Initializing the cluster.  
+Joins the swarm as a manager node.
+
+    docker swarm init `
+      --advertise-addr 192.168.0.1:2377 `
+      --listen-addr 192.168.0.1:2377
+
+On the other VMs.  
+Joining the swarm as worker nodes.
+
+    docker swarm join `
+      --advertise-addr 192.168.0.X:2377 `
+      --listen-addr 192.168.0.X:2377 `
+      --token SWMTKN-1-000000000 `
+      192.168.0.1:2377
+
+Listing the nodes.
+
+    docker node ls
+
+Leaving the swarm.
+
+    docker swarm leave
+
+Services
+---
+Instructing the swarm to run multiple instances of an image.  
+Stopped instances are replaced automatically.
+
+    docker service create `
+      --name sleep --replicas 5 `
+      ubuntu /bin/bash -c 'sleep 3600'
+
+Listing services.  
+The instances are balanced evenly across the nodes.
+
+    docker service ls
+    docker service ps sleep
+
+Inspecting services.
+
+    docker service inspect sleep
+
+Scaling services up and down.
+
+    docker service scale sleep=10
+    docker service scale sleep=4
+
+Updating services.
+
+    docker service update `
+      --image debian `
+      --update-parallelism 2 `
+      --update-delay 1m `
+      sleep 
+
+Removing services.
+
+    docker service rm sleep
+
+
+
 
 
 
