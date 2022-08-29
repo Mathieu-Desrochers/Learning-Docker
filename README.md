@@ -34,7 +34,7 @@ Pressing Ctrl-PQ detaches the terminal.
 
 Starting a container in the background.
 
-    docker container run -d ubuntu /bin/bash -c 'sleep 10'
+    docker container run -d ubuntu /bin/bash -c 'sleep 3600'
 
 Listing containers.
 
@@ -101,46 +101,19 @@ Building the image.
 The previous image was chunky at 994MB.  
 We got it down to 82 MB.
 
-Network
----
-Exposing container ports on the host.
-
-Set the working directory to /images/api-letters.  
-Writing the Dockerfile.
-
-    FROM golang:1.19.0
-    COPY . /src
-    WORKDIR /src
-    RUN go build main.go
-    EXPOSE 8080
-    CMD ["./main"]
-
-Running the container.
-
-    docker image build -t api-letters .
-    docker container run -p 5000:8080 api-letters
-
-Connecting through the host.
-
-    curl localhost:5000/letters
-
-Composing containers
+Compose
 ---
 Managing multiple containers as a unit.
 
-Set the working directory to /compose/multiple-containers.  
+Set the working directory to /images.  
 Writing the docker-compose.yml.
 
     version: "3.9"
     services:
-      api-letters:
-        build: ../../images/api-letters
-        ports:
-          - 5000:8080
-      api-numbers:
-        build: ../../images/api-numbers
-        ports:
-          - 5001:8081
+      nginx:
+        image: nginx
+      redis:
+        image: redis
 
 Running the containers.
 
@@ -170,22 +143,23 @@ Deleting the containers.
 Swarms
 ---
 Clustering multiple docker hosts.  
-Create three VMs that can communicate with each other.
+Create three docker hosts that can communicate with each other.  
+Consider using https://labs.play-with-docker.com.
 
-On the first VM.  
-Initializing the cluster.  
+On the first host.  
+Initializing the swarm.  
 Joins the swarm as a manager node.
 
     docker swarm init `
       --advertise-addr 192.168.0.1:2377 `
       --listen-addr 192.168.0.1:2377
 
-On the other VMs.  
+On the other hosts.  
 Joining the swarm as worker nodes.
 
     docker swarm join `
-      --advertise-addr 192.168.0.X:2377 `
-      --listen-addr 192.168.0.X:2377 `
+      --advertise-addr 192.168.0.x:2377 `
+      --listen-addr 192.168.0.x:2377 `
       --token SWMTKN-1-000000000 `
       192.168.0.1:2377
 
@@ -200,26 +174,26 @@ Leaving the swarm.
 Services
 ---
 Instructing the swarm to run multiple instances of an image.  
-Stopped instances are replaced automatically.
+Stopped containers are replaced automatically.
 
     docker service create `
-      --name sleep --replicas 5 `
+      --name service1 --replicas 5 `
       ubuntu /bin/bash -c 'sleep 3600'
 
 Listing services.  
-The instances are balanced evenly across the nodes.
+The containers are balanced evenly across the nodes.
 
     docker service ls
-    docker service ps sleep
+    docker service ps service1
 
 Inspecting services.
 
-    docker service inspect sleep
+    docker service inspect service1
 
 Scaling services up and down.
 
-    docker service scale sleep=10
-    docker service scale sleep=4
+    docker service scale service1=10
+    docker service scale service1=4
 
 Updating services.
 
@@ -227,37 +201,122 @@ Updating services.
       --image debian `
       --update-parallelism 2 `
       --update-delay 1m `
-      sleep 
+      service1
 
 Removing services.
 
-    docker service rm sleep
+    docker service rm service1
 
-
-
-
-
-
-
-Connecting containers
+Bridge network
 ---
-Set the working directory to /compose/network.  
-Writing the docker-compose.yml.
+Connecting containers on a single host.
 
-    version: "3.9"
-    services:
-      api-sum:
-        build: ../../images/api-sum
-        environment:
-          - API_NUMBERS_URL=http://api-numbers:8080
-        ports:
-          - 5001:8081
-      api-numbers:
-        build: ../../images/api-numbers
-        expose:
-          - 8080
+Creating a bridge network.
 
-Running the containers.
+    docker network create -d bridge bridge1
 
-    docker-compose up
-    curl localhost:5001/numbers
+Listing the networks.
+
+    docker network ls
+
+Attaching containers to the network.
+
+    docker container run `
+      --name container1 --network bridge1 `
+      -d busybox /bin/sh -c 'sleep 3600'
+
+    docker container run `
+      --name container2 --network bridge1 `
+      -d busybox /bin/sh -c 'sleep 3600'
+
+Inspecting networks.
+
+    docker network inspect bridge1
+
+Containers get an IP address through DHCP.
+
+    docker exec -it container1 /bin/sh -c 'ifconfig'
+
+Containers can address themselves through DNS.
+
+    docker exec -it container1 /bin/sh -c 'ping -c 3 container2'
+
+Overlay network
+---
+Connecting containers across multiple hosts.
+
+Create a swarm composed of two nodes.  
+Consider using https://labs.play-with-docker.com.
+
+On the first node.  
+Creating an overlay network.
+
+    docker network create -d overlay --attachable overlay1
+
+On the first node.  
+Attaching a container to the network.
+
+    docker container run `
+      --name container1 --network overlay1 `
+      -d busybox /bin/sh -c 'sleep 3600'
+
+On the second node.  
+Attaching a container to the network.
+
+    docker container run `
+      --name container2 --network overlay1 `
+      -d busybox /bin/sh -c 'sleep 3600'
+
+On the first node.  
+Confirming the containers can communicate.
+
+    docker exec -it container1 /bin/sh -c 'ping -c 3 container2'
+
+Published ports
+---
+Mapping container ports on the host.
+
+Set the working directory to /images/api.  
+Writing the Dockerfile.
+
+    FROM golang:1.19.0
+    COPY . /src
+    WORKDIR /src
+    RUN go build main.go
+    EXPOSE 8080
+    CMD ["./main"]
+
+Building the container.
+
+    docker image build -t api .
+
+Publishing a port.
+
+    docker container run --name api -p 5001:8080 -d api
+
+Listing the published ports.
+
+    docker port api
+
+Confirming the port is available from the host.
+
+    curl localhost:5001/hello
+
+Load balancing
+---
+Publishing a port multiple times on the same host with swarms.  
+A load balancer is offered by the node to distribute the connections.
+
+Initializing a single node.
+
+    docker swarm init
+
+Publishing the same port multiple times.
+
+    docker service create `
+      --name service1 -p 5002:8080 --replicas 3 `
+      -d api
+
+Confirming the port is load balanced by the node.
+
+    curl localhost:5002/hello
