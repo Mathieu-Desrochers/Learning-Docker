@@ -280,7 +280,7 @@ Writing the Dockerfile.
     EXPOSE 8080
     CMD ["./main"]
 
-Building the container.
+Building the image.
 
     docker image build -t api .
 
@@ -299,7 +299,7 @@ Confirming the port is available from the host.
 Load balancing
 ---
 Publishing a port multiple times on the same host with swarms.  
-A load balancer is offered by the node to distribute the connections.
+A load balancer is offered by the swarm to distribute the connections.
 
 Initializing a single node.
 
@@ -311,7 +311,7 @@ Publishing the same port multiple times.
       --name service1 -p 5002:8080 --replicas 3 `
       -d api
 
-Confirming the port is load balanced by the node.
+Confirming the port is load balanced by the swarm.
 
     curl localhost:5002/hello
 
@@ -352,7 +352,104 @@ requires the use of plugins.
 
     docker plugin ls
 
+Sharing images
+---
+Pushing images to hub.docker.com.
+
+Set the working directory to /images/api.  
+Building the image.
+
+    docker image build -t your-username/api .
+
+Set the working directory to /images/database.  
+Building the image.
+
+    docker image build -t your-username/database .
+
+Loging in.
+
+    docker login --username your-username
+
+Pushing the images.
+
+    docker push your-username/api
+    docker push your-username/database
+
+Loging out.
+
+    docker logout
+
+Secrets
+---
+Maybe apart?
+
 Stacks
 ---
 Managing multiple services declaratively on a swarm.
 
+Create a swarm composed of one manager and two worker nodes.  
+Consider using https://labs.play-with-docker.com.
+
+On the manager node.  
+Writing the docker-stack.yml.
+
+    version: "3.9"
+    services:
+      api:
+        image: your-username/api
+        ports:
+          - "8080:8080"
+        networks:
+          - network1
+        secrets:
+          - source: favoriteColor
+            target: favoriteColor
+        deploy:
+          replicas: 3
+      database:
+        image: your-username/database
+        ports:
+          - "8081:8081"
+        networks:
+          - network1
+        deploy:
+          replicas: 2
+    networks:
+      network1:
+    secrets:
+      favoriteColor:
+        external: true
+
+Configuring a secret.
+
+    docker secret create favoriteColor -
+    type value
+    Ctrl-Z
+
+Deploying the stack.
+
+    docker stack deploy -c docker-stack.yml stack1
+
+Listing stacks.
+
+    x
+
+Inspecting stacks.
+
+    x
+
+Communicating with services from one of the nodes.  
+Connections are load balanced across replicas.
+
+    curl localhost:8080/sum
+    curl localhost:8081/numbers
+
+Communicating with services from one of the containers.  
+Name resolution and load balancing across replicas is offered.
+
+    http.Get("http://database:8081/numbers")
+
+Inspecting logs.
+
+    docker service logs stack1_api
+    docker service logs stack1_database

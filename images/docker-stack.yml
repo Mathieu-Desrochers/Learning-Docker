@@ -1,0 +1,26 @@
+version: "3.9"
+services:
+  api:
+    image: your-username/api
+    ports:
+      - "8080:8080"
+    networks:
+      - network1
+    secrets:
+      - source: favoriteColor
+        target: favoriteColor
+    deploy:
+      replicas: 3
+  database:
+    image: your-username/database
+    ports:
+      - "8081:8081"
+    networks:
+      - network1
+    deploy:
+      replicas: 2
+networks:
+  network1:
+secrets:
+  favoriteColor:
+    external: true

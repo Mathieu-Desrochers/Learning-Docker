@@ -21,6 +21,17 @@ func main() {
 		io.WriteString(w, "Hello from "+localIP.String()+"\n")
 	})
 
+	http.HandleFunc("/sum", func(w http.ResponseWriter, r *http.Request) {
+		log.Print("GET /sum")
+
+		_, err := http.Get("http://database:8081/numbers")
+		if err != nil {
+		   log.Fatalln(err)
+		}
+
+		io.WriteString(w, "15\n")
+	})
+
 	log.Print("Listening on :8080...")
 
 	err := http.ListenAndServe(":8080", nil)
