@@ -103,7 +103,7 @@ We got it down to 82 MB.
 
 Compose
 ---
-Managing multiple containers as a unit.
+Managing multiple containers declaratively.
 
 Set the working directory to /images.  
 Writing the docker-compose.yml.
@@ -129,15 +129,9 @@ Stopping the containers
 
     docker-compose stop
 
-Restarting the containers.
-
-    docker-compose restart
-
 Deleting the containers.
 
-    docker-compose stop
     docker-compose rm
-
     docker-compose down
 
 Swarms
@@ -320,3 +314,45 @@ Publishing the same port multiple times.
 Confirming the port is load balanced by the node.
 
     curl localhost:5002/hello
+
+Volumes
+---
+Mounting local storage inside containers.
+
+Creating a volume.
+
+    docker volume create volume1
+
+Listing volumes.
+
+    docker volume ls
+
+Inspecting volumes.
+
+    docker volume inspect volume1
+
+Mounting the volume.
+
+    docker container run --name container1 `
+      --mount source=volume1,target=/volume1 `
+      -d ubuntu /bin/bash -c 'sleep 3600'
+
+Writing to the volume.
+
+    docker exec -it container1 /bin/bash -c 'echo hello > /volume1/hello'
+
+Deleting volumes.
+
+    docker container stop container1
+    docker container rm container1
+    docker volume rm volume1
+
+Mounting external storage on multiple hosts  
+requires the use of plugins.
+
+    docker plugin ls
+
+Stacks
+---
+Managing multiple services declaratively on a swarm.
+
