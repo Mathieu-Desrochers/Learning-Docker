@@ -299,7 +299,7 @@ Confirming the port is available from the host.
 Load balancing
 ---
 Publishing a port multiple times on the same host with swarms.  
-A load balancer is offered by the swarm to distribute the connections.
+A load balancer is offered by the nodes to distribute the connections.
 
 Initializing a single node.
 
@@ -311,7 +311,7 @@ Publishing the same port multiple times.
       --name service1 -p 5002:8080 --replicas 3 `
       -d api
 
-Confirming the port is load balanced by the swarm.
+Confirming the port is load balanced by the node.
 
     curl localhost:5002/hello
 
