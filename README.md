@@ -106,7 +106,7 @@ Compose
 Managing multiple containers declaratively.
 
 Set the working directory to /images.  
-Writing the docker-compose.yml.
+Writing docker-compose.yml.
 
     version: "3.9"
     services:
@@ -352,6 +352,47 @@ requires the use of plugins.
 
     docker plugin ls
 
+Configurations and secrets
+---
+Providing runtime values to containers.
+
+Creating configurations and secrets.
+
+    echo "Super green" | docker config create button_color -
+    echo "This is a secret" | docker secret create my_secret_data -
+
+Listing configurations and secrets.
+
+    docker config ls
+    docker secret ls
+
+Attaching configurations and secrets.
+
+    docker service create `
+      --name service1 `
+      --config button_color `
+      --secret my_secret_data `
+      -d busybox /bin/sh -c 'sleep 3600'
+
+Accessing configurations and secrets from a container.
+
+    docker ps
+    docker container exec -it 13524401a141 cat /button_color
+    docker container exec -it 13524401a141 cat /run/secrets/my_secret_data
+
+Configurations are mounted on the root file system.  
+Secrets are mounted in an in-memory filesystem.
+
+Both are encrypted on the swarm manager.  
+Both are plainly accessible from the containers.
+
+Deleting configurations and secrets.
+
+    docker service rm service1
+
+    docker config rm button_color
+    docker secret rm my_secret_data
+
 Sharing images
 ---
 Pushing images to hub.docker.com.
@@ -379,10 +420,6 @@ Loging out.
 
     docker logout
 
-Secrets
----
-Maybe apart?
-
 Stacks
 ---
 Managing multiple services declaratively on a swarm.
@@ -391,7 +428,7 @@ Create a swarm composed of one manager and two worker nodes.
 Consider using https://labs.play-with-docker.com.
 
 On the manager node.  
-Writing the docker-stack.yml.
+Writing docker-stack.yml.
 
     version: "3.9"
     services:
@@ -401,9 +438,6 @@ Writing the docker-stack.yml.
           - "8080:8080"
         networks:
           - network1
-        secrets:
-          - source: favoriteColor
-            target: favoriteColor
         deploy:
           replicas: 3
       database:
@@ -416,15 +450,6 @@ Writing the docker-stack.yml.
           replicas: 2
     networks:
       network1:
-    secrets:
-      favoriteColor:
-        external: true
-
-Configuring a secret.
-
-    docker secret create favoriteColor -
-    type value
-    Ctrl-Z
 
 Deploying the stack.
 
@@ -432,19 +457,19 @@ Deploying the stack.
 
 Listing stacks.
 
-    x
+    docker stack ls
 
 Inspecting stacks.
 
-    x
+    docker stack ps stack1
 
-Communicating with services from one of the nodes.  
+Communicating with services from the nodes.  
 Connections are load balanced across replicas.
 
     curl localhost:8080/sum
     curl localhost:8081/numbers
 
-Communicating with services from one of the containers.  
+Communicating with services from the containers.  
 Name resolution and load balancing across replicas is offered.
 
     http.Get("http://database:8081/numbers")
@@ -453,3 +478,19 @@ Inspecting logs.
 
     docker service logs stack1_api
     docker service logs stack1_database
+
+Managing the stack declaratively.  
+Updating docker-stack.yml.
+
+    services:
+      api:
+        deploy:
+          replicas: 5
+
+Applying the changes on the stack.
+
+    docker stack deploy -c docker-stack.yml stack1
+
+Deleting stacks.
+
+    docker stack rm stack1

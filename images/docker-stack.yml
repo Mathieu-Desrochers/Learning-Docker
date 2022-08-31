@@ -6,9 +6,6 @@ services:
       - "8080:8080"
     networks:
       - network1
-    secrets:
-      - source: favoriteColor
-        target: favoriteColor
     deploy:
       replicas: 3
   database:
@@ -21,6 +18,3 @@ services:
       replicas: 2
 networks:
   network1:
-secrets:
-  favoriteColor:
-    external: true
