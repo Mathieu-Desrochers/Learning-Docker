@@ -144,17 +144,17 @@ On the first host.
 Initializing the swarm.  
 Joins the swarm as a manager node.
 
-    docker swarm init `
-      --advertise-addr 192.168.0.1:2377 `
+    docker swarm init \
+      --advertise-addr 192.168.0.1:2377 \
       --listen-addr 192.168.0.1:2377
 
 On the other hosts.  
 Joining the swarm as worker nodes.
 
-    docker swarm join `
-      --advertise-addr 192.168.0.x:2377 `
-      --listen-addr 192.168.0.x:2377 `
-      --token SWMTKN-1-000000000 `
+    docker swarm join \
+      --advertise-addr 192.168.0.x:2377 \
+      --listen-addr 192.168.0.x:2377 \
+      --token SWMTKN-1-000000000 \
       192.168.0.1:2377
 
 Listing the nodes.
@@ -170,8 +170,8 @@ Services
 Instructing the swarm to run multiple instances of an image.  
 Stopped containers are replaced automatically.
 
-    docker service create `
-      --name service1 --replicas 5 `
+    docker service create \
+      --name service1 --replicas 5 \
       ubuntu /bin/bash -c 'sleep 3600'
 
 Listing services.  
@@ -191,10 +191,10 @@ Scaling services up and down.
 
 Updating services.
 
-    docker service update `
-      --image debian `
-      --update-parallelism 2 `
-      --update-delay 1m `
+    docker service update \
+      --image debian \
+      --update-parallelism 2 \
+      --update-delay 1m \
       service1
 
 Removing services.
@@ -215,12 +215,12 @@ Listing the networks.
 
 Attaching containers to the network.
 
-    docker container run `
-      --name container1 --network bridge1 `
+    docker container run \
+      --name container1 --network bridge1 \
       -d busybox /bin/sh -c 'sleep 3600'
 
-    docker container run `
-      --name container2 --network bridge1 `
+    docker container run \
+      --name container2 --network bridge1 \
       -d busybox /bin/sh -c 'sleep 3600'
 
 Inspecting networks.
@@ -250,15 +250,15 @@ Creating an overlay network.
 On the first node.  
 Attaching a container to the network.
 
-    docker container run `
-      --name container1 --network overlay1 `
+    docker container run \
+      --name container1 --network overlay1 \
       -d busybox /bin/sh -c 'sleep 3600'
 
 On the second node.  
 Attaching a container to the network.
 
-    docker container run `
-      --name container2 --network overlay1 `
+    docker container run \
+      --name container2 --network overlay1 \
       -d busybox /bin/sh -c 'sleep 3600'
 
 On the first node.  
@@ -307,8 +307,8 @@ Initializing a single node.
 
 Publishing the same port multiple times.
 
-    docker service create `
-      --name service1 -p 5002:8080 --replicas 3 `
+    docker service create \
+      --name service1 -p 5002:8080 --replicas 3 \
       -d api
 
 Confirming the port is load balanced by the node.
@@ -333,8 +333,8 @@ Inspecting volumes.
 
 Mounting the volume.
 
-    docker container run --name container1 `
-      --mount source=volume1,target=/volume1 `
+    docker container run --name container1 \
+      --mount source=volume1,target=/volume1 \
       -d ubuntu /bin/bash -c 'sleep 3600'
 
 Writing to the volume.
@@ -368,10 +368,10 @@ Listing configurations and secrets.
 
 Attaching configurations and secrets.
 
-    docker service create `
-      --name service1 `
-      --config button_color `
-      --secret my_secret_data `
+    docker service create \
+      --name service1 \
+      --config button_color \
+      --secret my_secret_data \
       -d busybox /bin/sh -c 'sleep 3600'
 
 Accessing configurations and secrets from a container.
