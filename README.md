@@ -380,16 +380,9 @@ Accessing configurations and secrets from a container.
     docker container exec -it 13524401a141 cat /button_color
     docker container exec -it 13524401a141 cat /run/secrets/my_secret_data
 
-Configurations are mounted on the root file system.  
-Secrets are mounted in an in-memory filesystem.
-
-Both are encrypted on the swarm manager.  
-Both are plainly accessible from the containers.
-
 Deleting configurations and secrets.
 
     docker service rm service1
-
     docker config rm button_color
     docker secret rm my_secret_data
 
